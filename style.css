@@ -1,3 +1,78 @@
-canvas {
-	border: 1px solid black;
+body {
+	/* display content centered */
+	margin: 0 auto;
+	width: 520px;
+
 }
+
+canvas {
+	border: 10px dashed #887a7a;
+}
+
+div {
+	display: flex;
+	align-content: center;
+	justify-content: space-around;
+}
+
+h1 {
+	text-align: center;
+}
+
+h2{
+	text-align: center;
+}
+
+#gameOver {
+	text-align: center;
+	font-size: 50px;
+	opacity: 0.5;
+	transform: translate(0, -450px);
+	display: none;
+}
+
+#play{
+	margin: 0 50%;
+	height: 100px;
+	width: 100px;
+	font-size: 100px;
+	text-align: center;
+	opacity: 0.5;
+	background-color: transparent;
+	border: none;
+	transform: translate(-50%, -350px);
+}
+
+#retry{
+	margin: 0 50%;
+	height: 100px;
+	width: 100px;
+	font-size: 100px;
+	text-align: center;
+	opacity: 0.5;
+	background-color: transparent;
+	border: none;
+	transform: translate(-50%, -450px);
+	display: none;
+}
+
+@media (max-width: 520px) {
+	#pauseButton {
+		display: block;
+	}
+
+	#pauseText {
+		display: none;
+	}
+}
+
+@media (min-width: 521px) {
+	#pauseButton {
+		display: none;
+	}
+
+	#pauseText {
+		display: block;
+	}
+}
+

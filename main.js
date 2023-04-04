@@ -5,12 +5,6 @@ const Directions = {
     Right: 3
 };
 
-const mainCanvas = document.getElementById("mainCanvas");
-const mainCtx = mainCanvas.getContext("2d");
-window.addEventListener("keydown", this.handleInput);
-
-let paused = false;
-
 class Object {
     constructor(x, y, size, color, active) {
         this.x = x;
@@ -29,19 +23,26 @@ class Object {
         this.y = newPos.y;
     }
 
+    padding = 2;
+
     draw() {
         if (this.active) {
         mainCtx.fillStyle = this.color;
-        mainCtx.fillRect(this.x - this.size * 0.5, this.y - this.size * 0.5, this.size, this.size);
+        mainCtx.fillRect(this.x - (this.size - this.padding) * 0.5, this.y - (this.size - this.padding) * 0.5, this.size - this.padding, this.size - this.padding);
         }
     }
 }
 
-const snakeBody = [];
-let gameSpeed = 1;
-let snakeLength = 1;
+const mainCanvas = document.getElementById("mainCanvas");
+const mainCtx = mainCanvas.getContext("2d");
+window.addEventListener("keydown", this.handleInput);
+document.getElementById("play").addEventListener("click", startGame);
+document.getElementById("retry").addEventListener("click", reset);
 
-let snakeSize = 52;
+let paused = true;
+//frame delay in ms - set in reset()
+let updateTime = 0;
+let snakeSize = 30;
 for (i = 0; i < snakeSize; i++) {
     if (mainCanvas.width % snakeSize === 0) {
         break;
@@ -49,16 +50,9 @@ for (i = 0; i < snakeSize; i++) {
     snakeSize--;
 }
 
+const snakeBody = [];
 const snake = new Object(0, 0, snakeSize, "rgb(0, 0, 0)", true);
-
-const snakeFood = new Object(0, 0, snakeSize, "rgb(150, 150, 150)", false);
-
-snakeBody.push(new Object(snake.x, snake.y, snake.size, snake.color, true));
-console.log(snakeBody[0]);
-
-let snakeDirection = Directions.Right;
-
-update();
+const snakeFood = new Object(0, 0, snakeSize, "rgb(255, 0, 0)", false);
 
 
 function update() {
@@ -66,7 +60,7 @@ function update() {
     {
         snake.pos = {x: snakeSize * 0.5, y: snakeSize * 0.5};
     } else {
-        switch (snakeDirection) {
+        switch (snake.direction) {
             case Directions.Up:
                 snake.y -= snakeSize;
                 break;
@@ -84,8 +78,9 @@ function update() {
 
     snakeBody.push(new Object(snake.x, snake.y, snake.size, snake.color, true));
 
-    if (snakeBody.length > snakeLength) {
+    if (snakeBody.length > snake.length) {
         snakeBody.shift();
+        console.log(snakeBody.length);
     }  
         
     snakeFood.active ? null : spawnFood();
@@ -93,11 +88,38 @@ function update() {
     checkCollision() ? null : draw();
 
     //check if paused otherwise update
-    setTimeout(() => checkPaused() , 1000 / gameSpeed);
+    setTimeout(() => checkPaused() , updateTime);
 }
 
 function checkPaused() {
     paused ? setTimeout(() => checkPaused(), 1000) : update();
+}
+
+function startGame() {
+    reset();
+    update();
+    document.getElementById("play").style.display = "none";
+}
+
+function endGame() {
+    paused = true;
+    document.getElementById("gameOver").style.display = "block";
+    document.getElementById("retry").style.display = "block";
+}
+
+//all default values
+function reset() {
+    document.getElementById("gameOver").style.display = "none";
+    document.getElementById("retry").style.display = "none";
+
+    paused = false;
+    updateTime = 200;
+    snake.length = 1;
+    snake.pos = {x: 0, y: 0};
+    snake.direction = Directions.Right;
+    snakeFood.active = false;
+    snakeBody.splice(0,snakeBody.length);
+    snakeBody.push(new Object(snake.x, snake.y, snake.size, snake.color, true));
 }
 
 function spawnFood() {
@@ -118,15 +140,18 @@ function checkCollision() {
     if (snake.x - snakeSize*0.5 < 0 || snake.x + snakeSize*0.5 > mainCanvas.width) {
         console.log('hit left or right wall');
         collided = true;
+        endGame();
     }
     else if (snake.y - snakeSize*0.5 < 0 || snake.y + snakeSize*0.5 > mainCanvas.height) {
         console.log('hit top or bottom wall');
         collided = true;
+        endGame();
     }
 
     if (snake.x === snakeFood.x && snake.y === snakeFood.y) {
-        snakeLength++;
+        snake.length++;
         snakeFood.active = false;
+        updateTime *= 0.9;
     }
 
     paused = collided;
@@ -152,28 +177,25 @@ function drawObject(object) {
 }
 
 function handleInput(e) {
-    if (e.key === "ArrowUp" && snakeDirection !== Directions.Down) {
-        snakeDirection = Directions.Up;
+    if (e.key === "ArrowUp" && snake.direction !== Directions.Down) {
+        snake.direction = Directions.Up;
     }
-    else if (e.key === "ArrowDown" && snakeDirection !== Directions.Up) {
-        snakeDirection = Directions.Down;
+    else if (e.key === "ArrowDown" && snake.direction !== Directions.Up) {
+        snake.direction = Directions.Down;
     } 
-    else if (e.key === "ArrowLeft" && snakeDirection !== Directions.Right) {
-        snakeDirection = Directions.Left;
+    else if (e.key === "ArrowLeft" && snake.direction !== Directions.Right) {
+        snake.direction = Directions.Left;
     }
-    else if (e.key === "ArrowRight" && snakeDirection !== Directions.Left) {
-        snakeDirection = Directions.Right;
+    else if (e.key === "ArrowRight" && snake.direction !== Directions.Left) {
+        snake.direction = Directions.Right;
     }
     else if (e.key === " ") {
         paused = !paused;
     }
-    else if (e.key === "Escape") {
-        //reset defualt values
-        paused = false;
-        snakeBody.length = 0;
-        snake.pos(0, 0);
-        snakeDirection = Directions.Right;
-    }
+
+    //add touch controls for mobile
 }
+
+
 
 
