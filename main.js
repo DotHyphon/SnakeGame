@@ -36,8 +36,14 @@ class Object {
 const mainCanvas = document.getElementById("mainCanvas");
 const mainCtx = mainCanvas.getContext("2d");
 window.addEventListener("keydown", this.handleInput);
-document.getElementById("play").addEventListener("click", startGame);
-document.getElementById("retry").addEventListener("click", reset);
+const pauseButton = document.getElementById("pauseButton");
+const playButton = document.getElementById("play");
+const retryButton = document.getElementById("retry");
+const gameOverText = document.getElementById("gameOver");
+const score = document.getElementById("score");
+pauseButton.addEventListener("click", switchPause);
+playButton.addEventListener("click", startGame);
+retryButton.addEventListener("click", reset);
 
 let paused = true;
 //frame delay in ms - set in reset()
@@ -80,7 +86,6 @@ function update() {
 
     if (snakeBody.length > snake.length) {
         snakeBody.shift();
-        console.log(snakeBody.length);
     }  
         
     snakeFood.active ? null : spawnFood();
@@ -98,20 +103,28 @@ function checkPaused() {
 function startGame() {
     reset();
     update();
-    document.getElementById("play").style.display = "none";
+    playButton.style.display = "none";
+    pauseButton.style.display = "block";
+}
+
+function switchPause() {
+    paused = !paused;
+    paused ? pauseButton.innerHTML = "Play" : pauseButton.innerHTML = "Pause";
 }
 
 function endGame() {
     paused = true;
-    document.getElementById("gameOver").style.display = "block";
-    document.getElementById("retry").style.display = "block";
+    gameOverText.style.display = "block";
+    retryButton.style.display = "block";
+    pauseButton.style.display = "none";
 }
 
 //all default values
 function reset() {
-    document.getElementById("gameOver").style.display = "none";
-    document.getElementById("retry").style.display = "none";
-
+    gameOverText.style.display = "none";
+    retryButton.style.display = "none";
+    pauseButton.style.display = "block";
+    score.textContent = 0;
     paused = false;
     updateTime = 200;
     snake.length = 1;
@@ -150,6 +163,7 @@ function checkCollision() {
 
     if (snake.x === snakeFood.x && snake.y === snakeFood.y) {
         snake.length++;
+        score.textContent = snake.length - 1;
         snakeFood.active = false;
         updateTime *= 0.9;
     }
