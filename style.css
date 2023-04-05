@@ -3,6 +3,9 @@ body {
 	margin: 0 auto;
 	width: 520px;
 
+	/* prevent refresh on swipe down */
+	overscroll-behavior-y: contain;
+
 }
 
 canvas {

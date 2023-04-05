@@ -33,9 +33,17 @@ class Object {
     }
 }
 
+window.addEventListener("keydown", this.handleInput);
+document.addEventListener('touchstart', checkTouch);
+document.addEventListener('touchend', checkSwipe);
+
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+
 const mainCanvas = document.getElementById("mainCanvas");
 const mainCtx = mainCanvas.getContext("2d");
-window.addEventListener("keydown", this.handleInput);
 const pauseButton = document.getElementById("pauseButton");
 const playButton = document.getElementById("play");
 const retryButton = document.getElementById("retry");
@@ -126,7 +134,7 @@ function reset() {
     pauseButton.style.display = "block";
     score.textContent = 0;
     paused = false;
-    updateTime = 200;
+    updateTime = 500;
     snake.length = 1;
     snake.pos = {x: 0, y: 0};
     snake.direction = Directions.Right;
@@ -165,7 +173,7 @@ function checkCollision() {
         snake.length++;
         score.textContent = snake.length - 1;
         snakeFood.active = false;
-        updateTime *= 0.9;
+        updateTime *= 0.95;
     }
 
     paused = collided;
@@ -208,6 +216,28 @@ function handleInput(e) {
     }
 
     //add touch controls for mobile
+}
+
+function checkTouch(e) {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+}
+
+function checkSwipe(e) {
+    touchEndX = e.changedTouches[0].screenX;
+    touchEndY = e.changedTouches[0].screenY;
+    if (touchEndX < touchStartX - 50 && snake.direction !== Directions.Right) {
+        snake.direction = Directions.Left;
+    }
+    else if (touchEndX > touchStartX + 50 && snake.direction !== Directions.Left) {
+        snake.direction = Directions.Right;
+    }
+    else if (touchEndY < touchStartY - 50 && snake.direction !== Directions.Down) {
+        snake.direction = Directions.Up;
+    }
+    else if (touchEndY > touchStartY + 50 && snake.direction !== Directions.Up) {
+        snake.direction = Directions.Down;
+    }
 }
 
 
