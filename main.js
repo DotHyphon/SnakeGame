@@ -42,6 +42,8 @@ let touchStartY = 0;
 let touchEndX = 0;
 let touchEndY = 0;
 
+let lastMoveDirection = Directions.Right;
+
 const mainCanvas = document.getElementById("mainCanvas");
 const mainCtx = mainCanvas.getContext("2d");
 const pauseButton = document.getElementById("pauseButton");
@@ -77,15 +79,19 @@ function update() {
         switch (snake.direction) {
             case Directions.Up:
                 snake.y -= snakeSize;
+                lastMoveDirection = Directions.Up;
                 break;
             case Directions.Down:
                 snake.y += snakeSize;
+                lastMoveDirection = Directions.Down;
                 break;
             case Directions.Left:
                 snake.x -= snakeSize;
+                lastMoveDirection = Directions.Left;
                 break;
             case Directions.Right:
                 snake.x += snakeSize;
+                lastMoveDirection = Directions.Right;
                 break;
         }
     }
@@ -138,6 +144,7 @@ function reset() {
     snake.length = 1;
     snake.pos = {x: 0, y: 0};
     snake.direction = Directions.Right;
+    lastMoveDirection = Directions.Right;
     snakeFood.active = false;
     snakeBody.splice(0,snakeBody.length);
     snakeBody.push(new Object(snake.x, snake.y, snake.size, snake.color, true));
@@ -161,13 +168,20 @@ function checkCollision() {
     if (snake.x - snakeSize*0.5 < 0 || snake.x + snakeSize*0.5 > mainCanvas.width) {
         console.log('hit left or right wall');
         collided = true;
-        endGame();
     }
     else if (snake.y - snakeSize*0.5 < 0 || snake.y + snakeSize*0.5 > mainCanvas.height) {
         console.log('hit top or bottom wall');
         collided = true;
-        endGame();
     }
+
+    //check self collision
+    snakeBody.forEach((bodyPart, index) => {
+        if (index < snakeBody.length - 1) {
+            if (snake.x === bodyPart.x && snake.y === bodyPart.y) {
+                collided = true;
+            }
+        }
+    });
 
     if (snake.x === snakeFood.x && snake.y === snakeFood.y) {
         snake.length++;
@@ -176,7 +190,7 @@ function checkCollision() {
         updateTime *= 0.95;
     }
 
-    paused = collided;
+    collided ? endGame() : null;
     return collided;
 }
 
@@ -199,16 +213,16 @@ function drawObject(object) {
 }
 
 function handleInput(e) {
-    if (e.key === "ArrowUp" && snake.direction !== Directions.Down) {
+    if (e.key === "ArrowUp" && lastMoveDirection !== Directions.Down) {
         snake.direction = Directions.Up;
     }
-    else if (e.key === "ArrowDown" && snake.direction !== Directions.Up) {
+    else if (e.key === "ArrowDown" && lastMoveDirection !== Directions.Up) {
         snake.direction = Directions.Down;
     } 
-    else if (e.key === "ArrowLeft" && snake.direction !== Directions.Right) {
+    else if (e.key === "ArrowLeft" && lastMoveDirection !== Directions.Right) {
         snake.direction = Directions.Left;
     }
-    else if (e.key === "ArrowRight" && snake.direction !== Directions.Left) {
+    else if (e.key === "ArrowRight" && lastMoveDirection !== Directions.Left) {
         snake.direction = Directions.Right;
     }
     else if (e.key === " ") {
@@ -226,16 +240,16 @@ function checkTouch(e) {
 function checkSwipe(e) {
     touchEndX = e.changedTouches[0].screenX;
     touchEndY = e.changedTouches[0].screenY;
-    if (touchEndX < touchStartX - 50 && snake.direction !== Directions.Right) {
+    if (touchEndX < touchStartX - 50 && lastMoveDirection !== Directions.Right) {
         snake.direction = Directions.Left;
     }
-    else if (touchEndX > touchStartX + 50 && snake.direction !== Directions.Left) {
+    else if (touchEndX > touchStartX + 50 && lastMoveDirection !== Directions.Left) {
         snake.direction = Directions.Right;
     }
-    else if (touchEndY < touchStartY - 50 && snake.direction !== Directions.Down) {
+    else if (touchEndY < touchStartY - 50 && lastMoveDirection !== Directions.Down) {
         snake.direction = Directions.Up;
     }
-    else if (touchEndY > touchStartY + 50 && snake.direction !== Directions.Up) {
+    else if (touchEndY > touchStartY + 50 && lastMoveDirection !== Directions.Up) {
         snake.direction = Directions.Down;
     }
 }
