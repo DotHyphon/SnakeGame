@@ -2,11 +2,15 @@ body {
 	/* display content centered */
 	margin: 0 auto;
 	width: 520px;
-
-	/* prevent refresh on swipe down */
-	overscroll-behavior-y: contain;
-
+	height: 100vw;
 }
+
+html, body {
+	/* prevent refresh on swipe down */
+	overflow: hidden;
+	overscroll-behavior: none;
+	touch-action: none;
+  }
 
 canvas {
 	border: 10px dashed #887a7a;
